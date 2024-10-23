@@ -1,6 +1,6 @@
 # Bad Parser
 
-Bad Parser is a terrible JSON parser and tokenizer written in Swift. It Probably shouldn't be used, but here it is anyway.
+Bad Parser is a terrible JSON parser and tokenizer written in Swift. It probably shouldn't be used, but here it is anyway.
 
 ## Usage
 

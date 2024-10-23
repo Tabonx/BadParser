@@ -10,7 +10,7 @@ import Foundation
 import Testing
 
 class BadParserTests {
-    @Test("Valid JSON Tests", arguments: validJSONCases)
+    @Test("Valid JSON Tests", .timeLimit(.minutes(4)), arguments: validJSONCases)
     func validJSON(_ json: String) async throws {
         #expect(throws: Never.self) {
             let tokens = try BadTokenizer().tokenize(json)
@@ -25,7 +25,32 @@ class BadParserTests {
             _ = try BadParser().parse(tokens)
         }
     }
+
+    @Test("Escaped characters Tests")
+    func escapedCharacters() async throws {
+        let string = Bundle.module.url(forResource: "EscapedString", withExtension: "json", subdirectory: "TestData")!
+
+        let json = try String(contentsOf: string, encoding: .utf8)
+
+        let tokens = try BadTokenizer().tokenize(json)
+        let parsed = try BadParser().parse(tokens)
+
+        let node = Node.object(value: [
+            "message": .string(value: "This is a test string with a quote: \" and a backslash: \\"),
+            "path": .string(value: "C:\\Users\\Name\\Documents"),
+            "newline": .string(value: "This string contains a newline character.\nSee?"),
+            "tab": .string(value: "This string contains a tab character.\tTabbed in."),
+            "unicode": .string(value: "This string contains a unicode character: \u{263A}"),
+            "backslashes": .string(value: "Multiple backslashes: \\\\"),
+            "quotes": .string(value: "A quote inside: \"hello\""),
+        ])
+        #expect(node == parsed)
+    }
 }
+
+let escapedPaths: [String] = [
+    "EscapedString",
+]
 
 let malformedJSONCases: [String] = [
     // Trailing comma in object
@@ -182,7 +207,7 @@ let validJSONCases: [String] = [
 
     // Object with special characters in strings
     """
-    { "quote": "He said, \"Hello World!\"" }
+    { "quote": "He said, \\\"Hello World!\\\"" }
     """,
 
     // Array with only one element

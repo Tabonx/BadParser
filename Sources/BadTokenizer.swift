@@ -55,13 +55,40 @@ public struct BadTokenizer {
             if char == "\"" {
                 var value = ""
                 current += 1
-                char = characters[current]
+                var isEscaped = false
 
-                while char != "\"", current < characters.count {
-                    value.append(char)
+                while current < characters.count {
+                    char = characters[current]
+
+                    if isEscaped {
+                        switch char {
+                        case "n":
+                            value.append("\n")
+                        case "t":
+                            value.append("\t")
+                        case "u":
+                            // unicode - grab the next 4 characters
+                            let unicodeHex = String(jsonString[current + 1 ... current + 4])
+
+                            if let scalar = UnicodeScalar(Int(unicodeHex, radix: 16)!) {
+                                value.append(Character(scalar))
+                            }
+
+                            current += 4
+                        default:
+                            // For other escaped characters, just append
+                            value.append(char)
+                        }
+                        isEscaped = false
+                    } else if char == "\\" {
+                        isEscaped = true
+                    } else if char == "\"" {
+                        break
+                    } else {
+                        value.append(char)
+                    }
 
                     current += 1
-                    char = characters[current]
                 }
 
                 current += 1
@@ -111,4 +138,13 @@ public struct BadTokenizer {
 
         return tokens
     }
+}
+
+extension StringProtocol {
+    subscript(_ offset: Int) -> Element { self[index(startIndex, offsetBy: offset)] }
+    subscript(_ range: Range<Int>) -> SubSequence { prefix(range.lowerBound + range.count).suffix(range.count) }
+    subscript(_ range: ClosedRange<Int>) -> SubSequence { prefix(range.lowerBound + range.count).suffix(range.count) }
+    subscript(_ range: PartialRangeThrough<Int>) -> SubSequence { prefix(range.upperBound.advanced(by: 1)) }
+    subscript(_ range: PartialRangeUpTo<Int>) -> SubSequence { prefix(range.upperBound) }
+    subscript(_ range: PartialRangeFrom<Int>) -> SubSequence { suffix(Swift.max(0, count - range.lowerBound)) }
 }

@@ -1,0 +1,9 @@
+{
+  "message": "This is a test string with a quote: \" and a backslash: \\",
+  "path": "C:\\Users\\Name\\Documents",
+  "newline": "This string contains a newline character.\nSee?",
+  "tab": "This string contains a tab character.\tTabbed in.",
+  "unicode": "This string contains a unicode character: \u263A",
+  "backslashes": "Multiple backslashes: \\\\",
+  "quotes": "A quote inside: \"hello\""
+}
